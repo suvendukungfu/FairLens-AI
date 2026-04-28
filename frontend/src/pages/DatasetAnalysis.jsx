@@ -75,18 +75,33 @@ export default function DatasetAnalysis() {
         className="grid grid-cols-2 md:grid-cols-4 gap-4"
       >
         {[
-          { label: 'Total Rows', value: analysisResult.dataset_info?.rows?.toLocaleString() || 0, color: 'from-blue-500/20 to-cyan-500/20', icon: '' },
-          { label: 'Features', value: analysisResult.dataset_info?.columns || 0, color: 'from-purple-500/20 to-pink-500/20', icon: '' },
-          { label: 'Missing Values', value: `${((Object.values(analysisResult.dataset_info?.missing_values || {}).reduce((a, b) => a + b, 0) / (analysisResult.dataset_info?.rows * analysisResult.dataset_info?.columns)) * 100).toFixed(1)}%`, color: 'from-orange-500/20 to-amber-500/20', icon: '️' },
-          { label: 'Bias Flags', value: analysisResult.bias_flags?.length || 0, color: 'from-emerald-500/20 to-teal-500/20', icon: '' },
-        ].map((stat) => (
-          <div key={stat.label} className={`glass-card p-4 bg-linear-to-br ${stat.color}`}>
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">{stat.icon}</span>
-              <span className="text-xs text-slate-500 uppercase tracking-wider">{stat.label}</span>
+          { label: 'Total Rows', value: analysisResult.dataset_info?.rows?.toLocaleString() || 0, color: 'blue', icon: '📊' },
+          { label: 'Features', value: analysisResult.dataset_info?.columns || 0, color: 'purple', icon: '⚡' },
+          { label: 'Missing Data', value: `${((Object.values(analysisResult.dataset_info?.missing_values || {}).reduce((a, b) => a + b, 0) / (analysisResult.dataset_info?.rows * analysisResult.dataset_info?.columns)) * 100).toFixed(1)}%`, color: 'amber', icon: '⚠️' },
+          { label: 'Bias Flags', value: analysisResult.bias_flags?.length || 0, color: 'emerald', icon: '🎯' },
+        ].map((stat, idx) => (
+          <motion.div 
+            key={stat.label}
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="relative group glass-card p-6 overflow-hidden transition-all duration-300 hover:border-slate-500/30 hover:shadow-2xl"
+          >
+            {/* Ambient Background Glow on Hover */}
+            <div className={`absolute -inset-4 bg-${stat.color}-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
+            
+            <div className="relative z-10 flex items-center justify-between mb-4">
+              <span className={`w-10 h-10 flex items-center justify-center rounded-xl bg-${stat.color}-500/10 text-${stat.color}-400 text-xl`}>
+                {stat.icon}
+              </span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">{stat.label}</span>
             </div>
-            <p className="text-2xl font-black text-slate-100 mt-2">{stat.value}</p>
-          </div>
+            
+            <p className="relative z-10 text-3xl font-black text-slate-100 tracking-tight">
+              {stat.value}
+            </p>
+            
+            {/* Decorative bottom line */}
+            <div className={`absolute bottom-0 left-0 h-1 w-full bg-${stat.color}-500/30 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out`} />
+          </motion.div>
         ))}
       </motion.div>
 

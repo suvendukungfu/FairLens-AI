@@ -119,21 +119,31 @@ export default function ModelPerformance() {
         className="grid grid-cols-2 md:grid-cols-4 gap-4"
       >
         {Object.entries(metrics).map(([key, value]) => (
-          <div key={key} className="glass-card p-5 text-center">
-            <p className="text-sm text-slate-400 mb-2 capitalize">{key}</p>
+          <motion.div 
+            key={key} 
+            whileHover={{ y: -5 }}
+            className="group glass-card p-6 relative overflow-hidden text-center transition-all duration-300 hover:border-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/10"
+          >
+            {/* Hover Glow */}
+            <div className="absolute inset-0 bg-primary-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            
+            <p className="text-sm font-semibold text-slate-400 mb-2 uppercase tracking-widest relative z-10">{key}</p>
             <motion.p
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-3xl font-black text-slate-100"
+              className="text-4xl font-black text-slate-100 relative z-10 tracking-tight"
             >
-              {(value * 100).toFixed(1)}%
+              {(value * 100).toFixed(1)}<span className="text-xl text-primary-400">%</span>
             </motion.p>
-            <p className="text-xs text-slate-500 mt-2">
-              {key === 'accuracy' ? 'Overall Accuracy' :
+            <p className="text-xs text-slate-500 mt-2 font-medium relative z-10">
+              {key === 'accuracy' ? 'Overall Precision Rate' :
                key === 'precision' ? 'Positive Predictive Value' :
-               key === 'recall' ? 'True Positive Rate' : 'F1 Score'}
+               key === 'recall' ? 'True Positive Rate' : 'Harmonic Mean'}
             </p>
-          </div>
+            
+            {/* Animated border line on hover */}
+            <div className="absolute bottom-0 left-0 h-1 w-full bg-primary-500/50 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out" />
+          </motion.div>
         ))}
       </motion.div>
 

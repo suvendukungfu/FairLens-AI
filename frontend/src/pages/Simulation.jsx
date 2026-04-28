@@ -267,50 +267,62 @@ export default function RealTimeSimulation() {
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className={`glass-card p-8 text-center ${
-              prediction?.classification === 'FAVORABLE' ? 'border-emerald-500/30' : 'border-rose-500/30'
+            className={`glass-card p-12 text-center relative overflow-hidden transition-colors duration-500 ${
+              prediction?.classification === 'FAVORABLE' ? 'border-emerald-500/50' : 'border-rose-500/50'
             }`}
           >
+            {/* Ambient Background Glow */}
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] blur-[100px] pointer-events-none transition-opacity duration-1000 ${
+              isCalculating ? 'opacity-50 bg-primary-500/20 animate-pulse' :
+              prediction?.classification === 'FAVORABLE' ? 'opacity-30 bg-emerald-500/20' : 'opacity-30 bg-rose-500/20'
+            }`} />
+
             {isCalculating ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                className="w-12 h-12 border-4 border-primary-500/30 border-t-primary-500 rounded-full mx-auto mb-4"
-              />
+              <div className="relative z-10 flex flex-col items-center justify-center py-8">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                  className="w-16 h-16 border-4 border-primary-500/20 border-t-primary-500 rounded-full mb-6"
+                />
+                <p className="text-primary-300 animate-pulse font-medium">Computing Neural Inference...</p>
+              </div>
             ) : (
-              <>
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/50 mb-6">
-                  <div className={`w-3 h-3 rounded-full ${
-                    prediction?.classification === 'FAVORABLE' ? 'bg-emerald-500' : 'bg-rose-500'
+              <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700/50 mb-8 backdrop-blur-md shadow-xl">
+                  <div className={`w-2.5 h-2.5 rounded-full ${
+                    prediction?.classification === 'FAVORABLE' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]'
                   } animate-pulse`} />
-                  <span className="text-sm font-medium text-slate-300">
-                    Real-time Prediction
+                  <span className="text-xs font-semibold text-slate-300 tracking-wider uppercase">
+                    Live Evaluation
                   </span>
                 </div>
 
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 20 }}
                 >
-                  <p className="text-6xl font-black mb-2">
-                    <span className={prediction?.classification === 'FAVORABLE' ? 'text-emerald-400' : 'text-rose-400'}>
-                      {(prediction?.score * 100).toFixed(1)}%
-                    </span>
-                  </p>
-                  <p className="text-2xl font-bold text-slate-300 mb-4">
-                    {prediction?.classification}
-                    <span className="text-lg font-normal text-slate-500 ml-2">Probability</span>
-                  </p>
+                  <div className="flex flex-col items-center justify-center mb-6">
+                    <p className={`text-[6rem] leading-none font-black tracking-tighter ${
+                       prediction?.classification === 'FAVORABLE' 
+                       ? 'bg-linear-to-b from-emerald-300 to-emerald-600 text-transparent bg-clip-text drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]' 
+                       : 'bg-linear-to-b from-rose-300 to-rose-600 text-transparent bg-clip-text drop-shadow-[0_0_30px_rgba(244,63,94,0.3)]'
+                    }`}>
+                      {(prediction?.score * 100).toFixed(1)}<span className="text-4xl ml-1">%</span>
+                    </p>
+                    <p className="text-3xl font-bold text-slate-100 mt-4 tracking-tight">
+                      {prediction?.classification}
+                    </p>
+                  </div>
 
                   {/* Fairness indicators */}
-                  <div className="grid grid-cols-3 gap-4 mt-6">
+                  <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-slate-700/50">
                     {fairnessImpact && Object.entries(fairnessImpact).map(([key, value]) => (
-                      <div key={key} className="p-3 bg-slate-800/30 rounded-lg">
-                        <p className="text-xs text-slate-500 mb-1 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
-                          <p className={`text-lg font-bold ${
+                      <div key={key} className="p-4 bg-slate-900/50 rounded-xl border border-slate-800/50 hover:bg-slate-800/50 transition-colors">
+                        <p className="text-xs text-slate-400 mb-2 capitalize font-medium">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                          <p className={`text-xl font-bold ${
                             value >= 0.8 ? 'text-emerald-400' :
-                            value >= 0.6 ? 'text-yellow-400' : 'text-red-400'
+                            value >= 0.6 ? 'text-yellow-400' : 'text-rose-400'
                           }`}>
                           {(value * 100).toFixed(0)}%
                         </p>
@@ -318,7 +330,7 @@ export default function RealTimeSimulation() {
                     ))}
                   </div>
                 </motion.div>
-              </>
+              </div>
             )}
           </motion.div>
 

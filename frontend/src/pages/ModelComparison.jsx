@@ -313,6 +313,82 @@ export default function ModelComparison() {
       </motion.div>
 
 
+      {/* AI Comparative Analysis */}
+      {models.length > 1 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="glass-card p-8 mt-8 border border-primary-500/20 relative overflow-hidden"
+        >
+          {/* Background glow */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+          
+          <h3 className="text-xl font-bold text-slate-100 mb-6 flex items-center gap-3">
+            <svg className="w-6 h-6 text-primary-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            AI Comparative Analysis
+          </h3>
+
+          <div className="space-y-4 relative z-10">
+            {Object.keys(models[0].metrics).map((metric, idx) => {
+              const original = models[0].metrics[metric];
+              const mitigated = models[1].metrics[metric];
+              const diff = original - mitigated; // For most fairness metrics, lower diff is better
+              const isImproved = diff > 0;
+              
+              if (Math.abs(diff) < 0.1) return null; // Skip negligible changes
+
+              return (
+                <motion.div
+                  key={metric}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + idx * 0.1 }}
+                  className={`p-4 rounded-xl border ${
+                    isImproved 
+                      ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-100' 
+                      : 'bg-rose-500/10 border-rose-500/20 text-rose-100'
+                  }`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className={`p-2 rounded-lg ${isImproved ? 'bg-emerald-500/20' : 'bg-rose-500/20'}`}>
+                      {isImproved ? (
+                        <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-lg mb-1">{metric}</h4>
+                      <p className={`text-sm ${isImproved ? 'text-emerald-200/70' : 'text-rose-200/70'} leading-relaxed`}>
+                        The {models[1].name} {isImproved ? 'successfully reduced' : 'unfortunately increased'} the disparity in {metric} by <span className="font-bold text-white">{Math.abs(diff).toFixed(1)}%</span>. 
+                        It moved from <span className="font-mono">{original.toFixed(1)}%</span> in the original model down to <span className="font-mono">{mitigated.toFixed(1)}%</span>.
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+            
+            {/* Contextual Summary */}
+            <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               transition={{ delay: 1 }}
+               className="mt-6 p-4 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-300 text-sm leading-relaxed"
+            >
+              <strong className="text-white">Note on Performance Trade-offs:</strong> Bias mitigation techniques often introduce a slight degradation in overall predictive accuracy. A successful mitigation strategy balances significant fairness improvements with minimal accuracy loss.
+            </motion.div>
+          </div>
+        </motion.div>
+      )}
+
     </motion.div>
   );
 }
