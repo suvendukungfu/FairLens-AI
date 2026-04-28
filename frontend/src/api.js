@@ -2,7 +2,12 @@ import axios from 'axios';
 
 const API_BASE = '/api';
 
-const api = axios.create({ baseURL: API_BASE });
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: {
+    'Bypass-Tunnel-Reminder': 'true'
+  }
+});
 
 export async function uploadDataset(file) {
   const formData = new FormData();

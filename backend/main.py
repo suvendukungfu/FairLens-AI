@@ -369,6 +369,7 @@ app = web.Application(middlewares=[cors_middleware])
 app.add_routes([
     # Health
     web.get("/health", health_check),
+    web.get("/api/health", health_check),
     # Upload
     web.post("/api/upload/", upload_dataset),
     web.get("/api/upload/sessions/{session_id}", get_session),
