@@ -1,9 +1,13 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/useAppStore';
 import KPICard from '../components/KPICard';
 import FairnessScoreGauge from '../components/FairnessScoreGauge';
 import AlertSystem from '../components/AlertSystem';
 import { AlertBanner } from '../components/AnimationUtils';
+import DatasetOverview from '../components/DatasetOverview';
+import ConfigPanel from '../components/ConfigPanel';
+import { runAnalysis } from '../api';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -14,7 +18,28 @@ const containerVariants = {
 };
 
 export default function DashboardOverview() {
-  const { analysisResult, alerts, addAlert } = useAppStore();
+  const { 
+    analysisResult, alerts, addAlert,
+    datasetInfo, sessionId, kaggleMeta,
+    selectedAttrs, targetColumn, favorableOutcome, 
+    setSelectedAttrs, setTargetColumn, setFavorableOutcome,
+    isLoading, setIsLoading, setAnalysisResult
+  } = useAppStore();
+
+  // Auto-configure from Kaggle metadata
+  useEffect(() => {
+    if (kaggleMeta && !analysisResult) {
+      if (kaggleMeta.suggested_sensitive && selectedAttrs.length === 0) {
+        setSelectedAttrs(kaggleMeta.suggested_sensitive);
+      }
+      if (kaggleMeta.suggested_target && !targetColumn) {
+        setTargetColumn(kaggleMeta.suggested_target);
+      }
+      if (kaggleMeta.suggested_favorable && !favorableOutcome) {
+        setFavorableOutcome(kaggleMeta.suggested_favorable);
+      }
+    }
+  }, [kaggleMeta, analysisResult, selectedAttrs.length, targetColumn, favorableOutcome, setSelectedAttrs, setTargetColumn, setFavorableOutcome]);
 
   // Simulate bias alerts based on analysis
   useEffect(() => {
@@ -56,21 +81,64 @@ export default function DashboardOverview() {
   }, [analysisResult]);
 
   if (!analysisResult) {
+    if (!datasetInfo) {
+      return (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center"
+          >
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-linear-to-br from-primary-500/20 to-primary-600/20 flex items-center justify-center">
+              <svg className="w-12 h-12 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-slate-300 mb-2">No Dataset Found</h3>
+            <p className="text-slate-500">Please upload a dataset to continue.</p>
+          </motion.div>
+        </div>
+      );
+    }
+
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
-        >
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary-500/20 to-primary-600/20 flex items-center justify-center">
-            <svg className="w-12 h-12 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <h3 className="text-xl font-bold text-slate-300 mb-2">No Analysis Yet</h3>
-          <p className="text-slate-500">Upload a dataset and run analysis to see insights</p>
-        </motion.div>
+      <div className="space-y-6">
+        <DatasetOverview info={datasetInfo} />
+        <ConfigPanel 
+          columns={datasetInfo.column_names || []}
+          selectedAttrs={selectedAttrs}
+          onToggleAttr={(attr) => {
+            if (selectedAttrs.includes(attr)) {
+              setSelectedAttrs(selectedAttrs.filter(a => a !== attr));
+            } else {
+              setSelectedAttrs([...selectedAttrs, attr]);
+            }
+          }}
+          targetColumn={targetColumn}
+          onSetTarget={setTargetColumn}
+          favorableOutcome={favorableOutcome}
+          onSetFavorableOutcome={setFavorableOutcome}
+          datasetInfo={datasetInfo}
+          loading={isLoading}
+          onRunAnalysis={async () => {
+            setIsLoading(true);
+            try {
+              const result = await runAnalysis(sessionId, selectedAttrs, targetColumn, favorableOutcome);
+              setAnalysisResult(result);
+            } catch (err) {
+              console.error(err);
+              addAlert({
+                id: Date.now(),
+                severity: 'high',
+                title: 'Analysis Failed',
+                message: err.response?.data?.error || 'An error occurred during analysis.',
+                timestamp: new Date()
+              });
+            } finally {
+              setIsLoading(false);
+            }
+          }}
+        />
       </div>
     );
   }
@@ -251,7 +319,7 @@ export default function DashboardOverview() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
                         <span className="text-lg">
-                          {alert.severity === 'high' ? '🔴' : alert.severity === 'medium' ? '🟡' : '🔵'}
+                          {alert.severity === 'high' ? '' : alert.severity === 'medium' ? '' : ''}
                         </span>
                         <div>
                           <p className="font-semibold text-slate-200">{alert.title}</p>
@@ -296,7 +364,7 @@ export default function DashboardOverview() {
           className="glass-card p-6 text-left group"
         >
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-colors">
+            <div className="p-3 rounded-xl bg-linear-to-br from-blue-500/20 to-cyan-500/20 group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-colors">
               <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
@@ -316,7 +384,7 @@ export default function DashboardOverview() {
           className="glass-card p-6 text-left group"
         >
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 group-hover:from-purple-500/30 group-hover:to-pink-500/30 transition-colors">
+            <div className="p-3 rounded-xl bg-linear-to-br from-purple-500/20 to-pink-500/20 group-hover:from-purple-500/30 group-hover:to-pink-500/30 transition-colors">
               <svg className="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
@@ -336,7 +404,7 @@ export default function DashboardOverview() {
           className="glass-card p-6 text-left group"
         >
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 group-hover:from-emerald-500/30 group-hover:to-teal-500/30 transition-colors">
+            <div className="p-3 rounded-xl bg-linear-to-br from-emerald-500/20 to-teal-500/20 group-hover:from-emerald-500/30 group-hover:to-teal-500/30 transition-colors">
               <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>

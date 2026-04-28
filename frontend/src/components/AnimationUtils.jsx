@@ -138,7 +138,7 @@ export function AlertBanner({ alert, onDismiss }) {
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">
           <span className="text-xl">
-            {alert.severity === 'high' ? '🔴' : alert.severity === 'medium' ? '🟡' : '🔵'}
+            {alert.severity === 'high' ? '' : alert.severity === 'medium' ? '' : ''}
           </span>
           <div>
             <p className="font-semibold">{alert.title}</p>

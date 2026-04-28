@@ -93,7 +93,7 @@ export default function BiasDetection() {
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-2xl font-bold text-slate-100 mb-2 flex items-center gap-3">
-            <span className="text-red-400">⚠️</span>
+            <span className="text-red-400">️</span>
             Bias Detection
           </h2>
           <p className="text-slate-400">
@@ -132,7 +132,7 @@ export default function BiasDetection() {
           >
             <div className="flex items-start justify-between mb-3">
               <span className="text-2xl">
-                {example.severity === 'high' ? '🔴' : '🟡'}
+                {example.severity === 'high' ? '' : ''}
               </span>
               <span className="text-xs font-semibold px-2 py-1 rounded-full bg-slate-800/50 text-slate-300">
                 {example.group}

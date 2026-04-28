@@ -73,5 +73,5 @@ def generate_pdf_report_route(request: AnalysisRequest):
             headers={"Content-Disposition": f"attachment; filename={filename}{ext}"}
         )
     except Exception as e:
-        print(f"❌ Report Generation Error: {str(e)}")
+        print(f" Report Generation Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to generate report: {str(e)}")

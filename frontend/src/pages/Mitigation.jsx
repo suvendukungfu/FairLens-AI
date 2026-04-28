@@ -7,38 +7,62 @@ import {
 import { useAppStore } from '../store/useAppStore';
 import { CardSkeleton } from '../components/Skeleton';
 
+import { runMitigation } from '../api';
+
 const mitigationStrategies = [
-  { id: 'reweighting', name: 'Reweighting', description: 'Adjust sample weights to balance groups', icon: '⚖️' },
-  { id: 'adversarial', name: 'Adversarial Debiasing', description: 'Learn fair representations', icon: '🛡️' },
-  { id: 'fairlearn', name: 'Fairlearn Post-processing', description: 'Calibrate predictions for fairness', icon: '🎯' },
-  { id: 'disparate-impact', name: 'Disparate Impact Remover', description: 'Remove correlations with protected attributes', icon: '🔧' },
+  { id: 'reweighing', name: 'Reweighting', description: 'Adjust sample weights to balance groups', icon: '' },
+  { id: 'resampling', name: 'Resampling', description: 'Resample dataset to balance groups', icon: '' },
+  { id: 'feature_removal', name: 'Feature Removal', description: 'Remove highly correlated biased features', icon: '' },
 ];
 
 export default function Mitigation() {
-  const { analysisResult, isLoading } = useAppStore();
-  const [selectedStrategy, setSelectedStrategy] = useState('reweighting');
-  const [isComparing, setIsComparing] = useState(true);
-  const [mitigationResults, setMitigationResults] = useState(null);
+  const { 
+    analysisResult, 
+    sessionId, 
+    selectedAttrs, 
+    targetColumn, 
+    favorableOutcome,
+    mitigationResult, 
+    setMitigationResult,
+    isLoading, 
+    setIsLoading 
+  } = useAppStore();
+  
+  const [selectedStrategy, setSelectedStrategy] = useState('reweighing');
 
-  // Simulate mitigation impact
-  const metrics = analysisResult?.fairness_metrics || [];
-  const originalValues = metrics.map(m => m.value);
-  const improvedValues = metrics.map(m => {
-    if (m.is_biased) {
-      // Simulate improvement
-      const improvement = (1 - m.value / (m.threshold || 1)) * 0.6;
-      return Math.min(m.value + (1 - m.value) * 0.5, 0.95);
+  const handleRunMitigation = async () => {
+    setIsLoading(true);
+    try {
+      const result = await runMitigation(
+        sessionId, 
+        selectedAttrs, 
+        targetColumn, 
+        selectedStrategy, 
+        favorableOutcome
+      );
+      setMitigationResult(result);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-    return m.value;
-  });
+  };
 
-  const comparisonData = metrics.map((m, idx) => ({
-    metric: m.metric_name.length > 20 ? m.metric_name.substring(0, 20) + '...' : m.metric_name,
-    original: m.value * 100,
-    improved: improvedValues[idx] * 100,
-    threshold: (m.threshold || 0.8) * 100,
-    improvement: ((improvedValues[idx] - m.value) / (1 - m.value) * 100) || 0,
-  }));
+  const metrics = analysisResult?.fairness_metrics || [];
+  
+  // Use real mitigation results if available, otherwise show empty/placeholder
+  const comparisonData = metrics.map((m, idx) => {
+    const afterMetric = mitigationResult?.after_metrics?.find(am => am.metric_name === m.metric_name);
+    const improvedVal = afterMetric ? afterMetric.value : m.value;
+    
+    return {
+      metric: m.metric_name.length > 20 ? m.metric_name.substring(0, 20) + '...' : m.metric_name,
+      original: m.value * 100,
+      improved: improvedVal * 100,
+      threshold: (m.threshold || 0.1) * 100, // Threshold is usually a difference limit
+      improvement: m.value > 0 ? ((m.value - improvedVal) / m.value * 100) : 0,
+    };
+  });
 
   if (isLoading) {
     return (
@@ -62,9 +86,9 @@ export default function Mitigation() {
   }
 
   // Calculate overall improvement
-  const avgImprovement = comparisonData.reduce((sum, d) => sum + d.improvement, 0) / comparisonData.length;
-  const biasedCount = comparisonData.filter(d => d.original < d.threshold).length;
-  const fixedCount = comparisonData.filter(d => d.improved >= d.threshold).length;
+  const avgImprovement = mitigationResult?.improvement_percentage || 0;
+  const biasedCountBefore = metrics.filter(m => m.is_biased).length;
+  const biasedCountAfter = mitigationResult?.after_metrics?.filter(m => m.is_biased).length ?? biasedCountBefore;
 
   return (
     <motion.div
@@ -114,14 +138,14 @@ export default function Mitigation() {
         >
           <div className="text-center">
             <p className="text-sm text-slate-400 mb-2">Biased Metrics Before</p>
-            <p className="text-4xl font-black text-red-400">{biasedCount}</p>
+            <p className="text-4xl font-black text-red-400">{biasedCountBefore}</p>
           </div>
           <div className="text-center border-x border-slate-700/30">
-            <p className="text-sm text-slate-400 mb-2">Fixed After Mitigation</p>
-            <p className="text-4xl font-black text-emerald-400">{fixedCount}</p>
+            <p className="text-sm text-slate-400 mb-2">Biased Metrics After</p>
+            <p className="text-4xl font-black text-emerald-400">{biasedCountAfter}</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-slate-400 mb-2">Average Improvement</p>
+            <p className="text-sm text-slate-400 mb-2">Overall Improvement</p>
             <p className="text-4xl font-black text-primary-400">
               {avgImprovement.toFixed(1)}%
             </p>
@@ -158,8 +182,8 @@ export default function Mitigation() {
                     <div
                       className={`h-full rounded-full ${
                         comp.original < comp.threshold
-                          ? 'bg-gradient-to-r from-red-500 to-rose-500'
-                          : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                          ? 'bg-linear-to-r from-red-500 to-rose-500'
+                          : 'bg-linear-to-r from-emerald-500 to-teal-500'
                       }`}
                       style={{ width: `${(comp.original / 100) * 100}%` }}
                     />
@@ -197,8 +221,8 @@ export default function Mitigation() {
                     <motion.div
                       className={`h-full rounded-full ${
                         comp.improved < comp.threshold
-                          ? 'bg-gradient-to-r from-yellow-500 to-amber-500'
-                          : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                          ? 'bg-linear-to-r from-yellow-500 to-amber-500'
+                          : 'bg-linear-to-r from-emerald-500 to-teal-500'
                       }`}
                       initial={{ width: 0 }}
                       animate={{ width: `${(comp.improved / 100) * 100}%` }}
@@ -230,6 +254,7 @@ export default function Mitigation() {
         className="flex gap-4"
       >
         <motion.button
+          onClick={handleRunMitigation}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className="btn-primary flex items-center gap-2"

@@ -2,9 +2,9 @@ export default function BiasFlags({ flags }) {
   if (!flags || flags.length === 0) return null;
 
   const severityIcons = {
-    high: '🔴',
-    medium: '🟡',
-    low: '🟢',
+    high: '',
+    medium: '',
+    low: '',
   };
 
   return (

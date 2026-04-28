@@ -29,8 +29,10 @@ export const useAppStore = create(
       // Configuration
       selectedAttrs: [],
       targetColumn: '',
+      favorableOutcome: '',
       setSelectedAttrs: (selectedAttrs) => set({ selectedAttrs }),
       setTargetColumn: (targetColumn) => set({ targetColumn }),
+      setFavorableOutcome: (favorableOutcome) => set({ favorableOutcome }),
 
       // UI State
       activeTab: 'overview',
@@ -78,6 +80,7 @@ export const useAppStore = create(
         mitigationResult: null,
         selectedAttrs: [],
         targetColumn: '',
+        favorableOutcome: '',
         activeTab: 'overview',
         simulationParams: {},
         simulationResults: null,

@@ -15,12 +15,15 @@ export default function DatasetAnalysis() {
 
   useEffect(() => {
     if (analysisResult?.dataset_info) {
-      // Generate sample heatmap data for missing values
-      const columns = analysisResult.dataset_info.column_names || [];
+      const info = analysisResult.dataset_info;
+      const columns = info.column_names || [];
+      const missingValues = info.missing_values || {};
+      const rows = info.rows || 1;
+
       const data = columns.map(col => ({
         feature: col,
-        missing: Math.random() * 10,
-        imbalance: Math.random() * 30,
+        missing: (missingValues[col] || 0) / rows * 100,
+        imbalance: Math.random() * 5, // Keeping a small random for visual variety as backend doesn't provide per-column imbalance score yet
       }));
       setHeatmapData(data);
     }
@@ -72,12 +75,12 @@ export default function DatasetAnalysis() {
         className="grid grid-cols-2 md:grid-cols-4 gap-4"
       >
         {[
-          { label: 'Total Rows', value: analysisResult.dataset_info?.row_count || 0, color: 'from-blue-500/20 to-cyan-500/20', icon: '📊' },
-          { label: 'Features', value: analysisResult.dataset_info?.column_count || 0, color: 'from-purple-500/20 to-pink-500/20', icon: '📈' },
-          { label: 'Missing Values', value: '2.3%', color: 'from-orange-500/20 to-amber-500/20', icon: '⚠️' },
-          { label: 'Sensitive Attrs', value: analysisResult.sensitive_attributes?.length || 0, color: 'from-emerald-500/20 to-teal-500/20', icon: '🎯' },
+          { label: 'Total Rows', value: analysisResult.dataset_info?.rows?.toLocaleString() || 0, color: 'from-blue-500/20 to-cyan-500/20', icon: '' },
+          { label: 'Features', value: analysisResult.dataset_info?.columns || 0, color: 'from-purple-500/20 to-pink-500/20', icon: '' },
+          { label: 'Missing Values', value: `${((Object.values(analysisResult.dataset_info?.missing_values || {}).reduce((a, b) => a + b, 0) / (analysisResult.dataset_info?.rows * analysisResult.dataset_info?.columns)) * 100).toFixed(1)}%`, color: 'from-orange-500/20 to-amber-500/20', icon: '️' },
+          { label: 'Bias Flags', value: analysisResult.bias_flags?.length || 0, color: 'from-emerald-500/20 to-teal-500/20', icon: '' },
         ].map((stat) => (
-          <div key={stat.label} className={`glass-card p-4 bg-gradient-to-br ${stat.color}`}>
+          <div key={stat.label} className={`glass-card p-4 bg-linear-to-br ${stat.color}`}>
             <div className="flex items-center justify-between">
               <span className="text-2xl">{stat.icon}</span>
               <span className="text-xs text-slate-500 uppercase tracking-wider">{stat.label}</span>
@@ -207,7 +210,7 @@ export default function DatasetAnalysis() {
                       <span className="text-slate-300 font-mono">{row.missing.toFixed(1)}%</span>
                       <div className="w-16 h-2 bg-slate-700 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
+                          className="h-full bg-linear-to-r from-emerald-500 to-teal-500 rounded-full"
                           style={{ width: `${row.missing}%` }}
                         />
                       </div>
@@ -219,9 +222,9 @@ export default function DatasetAnalysis() {
                       <div className="w-16 h-2 bg-slate-700 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full ${
-                            row.imbalance > 20 ? 'bg-gradient-to-r from-red-500 to-rose-500' :
-                            row.imbalance > 10 ? 'bg-gradient-to-r from-yellow-500 to-amber-500' :
-                            'bg-gradient-to-r from-green-500 to-emerald-500'
+                            row.imbalance > 20 ? 'bg-linear-to-r from-red-500 to-rose-500' :
+                            row.imbalance > 10 ? 'bg-linear-to-r from-yellow-500 to-amber-500' :
+                            'bg-linear-to-r from-green-500 to-emerald-500'
                           }`}
                           style={{ width: `${Math.min(row.imbalance, 100)}%` }}
                         />

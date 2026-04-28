@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 
 const TABS = [
-  { id: 'overview', label: 'Overview', icon: '📊', description: 'Executive summary & risk score' },
-  { id: 'dataset', label: 'Dataset Analysis', icon: '📁', description: 'Distribution & feature analysis' },
-  { id: 'performance', label: 'Model Performance', icon: '⚡', description: 'Accuracy, F1 & Confusion Matrix' },
-  { id: 'metrics', label: 'Fairness Metrics', icon: '⚖️', description: 'Detailed fairness analysis' },
-  { id: 'flags', label: 'Bias Detection', icon: '🚩', description: 'Detected bias patterns' },
-  { id: 'mitigation', label: 'Mitigation', icon: '🛡️', description: 'Bias reduction strategies' },
-  { id: 'reports', label: 'Reports', icon: '📄', description: 'Generate audit report' },
+  { id: 'overview', label: 'Overview', icon: '', description: 'Executive summary & risk score' },
+  { id: 'dataset', label: 'Dataset Analysis', icon: '', description: 'Distribution & feature analysis' },
+  { id: 'performance', label: 'Model Performance', icon: '', description: 'Accuracy, F1 & Confusion Matrix' },
+  { id: 'metrics', label: 'Fairness Metrics', icon: '️', description: 'Detailed fairness analysis' },
+  { id: 'flags', label: 'Bias Detection', icon: '', description: 'Detected bias patterns' },
+  { id: 'mitigation', label: 'Mitigation', icon: '️', description: 'Bias reduction strategies' },
+  { id: 'reports', label: 'Reports', icon: '', description: 'Generate audit report' },
 ];
 
 export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggleCollapse }) {

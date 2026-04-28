@@ -214,7 +214,7 @@ export default function Reports() {
                           ? 'bg-red-500/20 text-red-300'
                           : 'bg-emerald-500/20 text-emerald-300'
                       }`}>
-                        {metric.is_biased ? '⚠ Issue' : '✓ OK'}
+                        {metric.is_biased ? ' Issue' : ' OK'}
                       </span>
                     </td>
                   </motion.tr>

@@ -369,7 +369,7 @@ export default function RealTimeSimulation() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-xl">
-                        {status === 'good' ? '✅' : status === 'warning' ? '⚠️' : '❌'}
+                        {status === 'good' ? '' : status === 'warning' ? '️' : ''}
                       </span>
                       <div>
                         <p className="font-semibold text-slate-200">
@@ -444,7 +444,7 @@ export default function RealTimeSimulation() {
                   className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg"
                 >
                   <p className="text-red-300 leading-relaxed">
-                    ⚠ <span className="font-semibold">Bias Alert</span>:{' '}
+                     <span className="font-semibold">Bias Alert</span>:{' '}
                     {params.gender === 'Female' && 'Female applicants in this scenario receive 22% lower approval rates than males.'}
                     {params.race === 'Black' && 'Black applicants in this scenario face 28% disparity compared to white applicants.'}
                     {params.race !== 'Black' && params.gender !== 'Female' && 'Consider adjusting model parameters to reduce disparate impact for this demographic.'}

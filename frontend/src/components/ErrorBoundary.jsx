@@ -17,7 +17,7 @@ class ErrorBoundary extends Component {
     });
 
     // Log error to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.error('Error Boundary caught an error:', error, errorInfo);
     }
   }
@@ -54,7 +54,7 @@ class ErrorBoundary extends Component {
                 Refresh Page
               </button>
             </div>
-            {process.env.NODE_ENV === 'development' && (
+            {import.meta.env.DEV && (
               <details className="mt-6 text-left">
                 <summary className="text-sm text-slate-500 cursor-pointer hover:text-slate-400">
                   Error Details (Development)

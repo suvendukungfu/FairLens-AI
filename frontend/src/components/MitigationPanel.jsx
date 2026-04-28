@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
 
 const STRATEGIES = [
-  { id: 'reweighing', name: 'Reweighing', desc: 'Adjust instance weights to balance group outcomes', icon: '⚖️' },
-  { id: 'resampling', name: 'Resampling', desc: 'Over/undersample to balance group sizes', icon: '🔄' },
-  { id: 'feature_removal', name: 'Feature Removal', desc: 'Remove sensitive attributes from dataset', icon: '🗑️' },
+  { id: 'reweighing', name: 'Reweighing', desc: 'Adjust instance weights to balance group outcomes', icon: '️' },
+  { id: 'resampling', name: 'Resampling', desc: 'Over/undersample to balance group sizes', icon: '' },
+  { id: 'feature_removal', name: 'Feature Removal', desc: 'Remove sensitive attributes from dataset', icon: '️' },
 ];
 
 export default function MitigationPanel({ sessionId, sensitiveAttrs, targetColumn, onMitigate, mitigationResult, loading }) {

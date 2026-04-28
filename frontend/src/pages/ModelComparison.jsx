@@ -315,7 +315,7 @@ export default function ModelComparison() {
                             }`}>
                               {value}%
                               {isBest && (
-                                <span className="ml-1">👑</span>
+                                <span className="ml-1"></span>
                               )}
                             </span>
                           </td>

@@ -160,7 +160,7 @@ export default function FairnessMetrics() {
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                     : 'bg-red-500/20 text-red-300 border border-red-500/30'
                 }`}>
-                  {isFair ? '✓ Fair' : '✗ Biased'}
+                  {isFair ? ' Fair' : ' Biased'}
                 </div>
               </motion.div>
             );
@@ -266,7 +266,7 @@ export default function FairnessMetrics() {
                           ? 'bg-red-500/20 text-red-300'
                           : 'bg-emerald-500/20 text-emerald-300'
                       }`}>
-                        {metric.is_biased ? '⚠ Biased' : '✓ Fair'}
+                        {metric.is_biased ? ' Biased' : ' Fair'}
                       </span>
                     </td>
                   </motion.tr>

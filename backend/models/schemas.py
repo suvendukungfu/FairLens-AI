@@ -11,6 +11,7 @@ class DatasetInfo(BaseModel):
     column_names: list[str]
     dtypes: dict[str, str]
     missing_values: dict[str, int]
+    unique_values: dict[str, list[str]] = Field(default_factory=dict)
 
 
 class DistributionData(BaseModel):
@@ -59,6 +60,7 @@ class MitigationRequest(BaseModel):
     sensitive_attributes: list[str]
     target_column: str
     strategy: str  # "reweighing", "resampling", "feature_removal"
+    favorable_outcome: Optional[str] = None
 
 
 class MitigationResult(BaseModel):

@@ -6,17 +6,17 @@ import AlertSystem from './AlertSystem';
 import NotificationPanel from './NotificationPanel';
 
 const menuItems = [
-  { path: '/overview', label: 'Overview', icon: '📊', description: 'Executive summary' },
-  { path: '/dataset', label: 'Dataset', icon: '📁', description: 'Data analysis' },
-  { path: '/performance', label: 'Performance', icon: '📈', description: 'Model metrics' },
-  { path: '/metrics', label: 'Metrics', icon: '⚖️', description: 'Fairness metrics' },
-  { path: '/bias', label: 'Bias Detection', icon: '🚨', description: 'Identify issues' },
-  { path: '/mitigation', label: 'Mitigation', icon: '🛡️', description: 'Reduction techniques' },
-  { path: '/simulation', label: 'Simulator', icon: '🎮', description: 'Real-time testing' },
-  { path: '/timeline', label: 'Timeline', icon: '📅', description: 'Progress tracking' },
-  { path: '/compare', label: 'Compare', icon: '🔍', description: 'Model comparison' },
-  { path: '/reports', label: 'Reports', icon: '📄', description: 'Export & share' },
-  { path: '/explain', label: 'Explain', icon: '💡', description: 'Feature importance' },
+  { path: '/overview', label: 'Overview', icon: '', description: 'Executive summary' },
+  { path: '/dataset', label: 'Dataset', icon: '', description: 'Data analysis' },
+  { path: '/performance', label: 'Performance', icon: '', description: 'Model metrics' },
+  { path: '/metrics', label: 'Metrics', icon: '️', description: 'Fairness metrics' },
+  { path: '/bias', label: 'Bias Detection', icon: '', description: 'Identify issues' },
+  { path: '/mitigation', label: 'Mitigation', icon: '️', description: 'Reduction techniques' },
+  { path: '/simulation', label: 'Simulator', icon: '', description: 'Real-time testing' },
+  { path: '/timeline', label: 'Timeline', icon: '', description: 'Progress tracking' },
+  { path: '/compare', label: 'Compare', icon: '', description: 'Model comparison' },
+  { path: '/reports', label: 'Reports', icon: '', description: 'Export & share' },
+  { path: '/explain', label: 'Explain', icon: '', description: 'Feature importance' },
 ];
 
 export default function AppLayout({ children }) {
@@ -38,7 +38,7 @@ export default function AppLayout({ children }) {
         <div className="p-6 flex items-center justify-between border-b border-slate-700/30">
           {!sidebarCollapsed && (
             <div>
-              <h1 className="text-xl font-black bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-black bg-linear-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
                 FairLens AI
               </h1>
               <p className="text-xs text-slate-500">Fairness Platform</p>
@@ -91,7 +91,7 @@ export default function AppLayout({ children }) {
             onClick={reset}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800/30 transition-all mt-8 border-t border-slate-700/30 pt-6"
           >
-            <span className="text-xl">📤</span>
+            <span className="text-xl"></span>
             {!sidebarCollapsed && <span className="font-medium text-sm">Upload New Dataset</span>}
           </button>
         </nav>
@@ -118,7 +118,7 @@ export default function AppLayout({ children }) {
               <NotificationPanel />
 
               {/* User Avatar */}
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold">
                 U
               </div>
             </div>
@@ -135,7 +135,7 @@ export default function AppLayout({ children }) {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              <Outlet />
+              {children || <Outlet />}
             </motion.div>
           </AnimatePresence>
         </main>

@@ -1,4 +1,15 @@
-export default function ConfigPanel({ columns, selectedAttrs, onToggleAttr, targetColumn, onSetTarget, onRunAnalysis, loading }) {
+export default function ConfigPanel({ 
+  columns, 
+  selectedAttrs, 
+  onToggleAttr, 
+  targetColumn, 
+  onSetTarget, 
+  favorableOutcome,
+  onSetFavorableOutcome,
+  datasetInfo,
+  onRunAnalysis, 
+  loading 
+}) {
   const categoricalCols = columns || [];
   const canRun = selectedAttrs.length > 0 && targetColumn;
 
@@ -52,6 +63,29 @@ export default function ConfigPanel({ columns, selectedAttrs, onToggleAttr, targ
           ))}
         </select>
       </div>
+
+      {/* Favorable Outcome Selection */}
+      {targetColumn && datasetInfo?.unique_values?.[targetColumn]?.length > 0 && (
+        <div className="mb-5 animate-fade-in-up">
+          <label className="text-sm text-slate-400 font-medium block mb-2">
+            Select Favorable Outcome
+          </label>
+          <select
+            value={favorableOutcome}
+            onChange={(e) => onSetFavorableOutcome(e.target.value)}
+            className="w-full p-3 rounded-xl bg-slate-800/60 border border-slate-600/40 text-slate-200 focus:border-primary-500 focus:outline-none transition-colors"
+            id="favorable-outcome-select"
+          >
+            <option value="">Auto-detect (Recommended)</option>
+            {datasetInfo.unique_values[targetColumn].map((val) => (
+              <option key={val} value={val}>{val}</option>
+            ))}
+          </select>
+          <p className="text-[10px] text-slate-500 mt-2">
+            The outcome considered positive (e.g., '1', 'Yes', or 'Approved').
+          </p>
+        </div>
+      )}
 
       {/* Run Button */}
       <button

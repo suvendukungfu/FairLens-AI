@@ -13,30 +13,33 @@ export async function uploadDataset(file) {
   return res.data;
 }
 
-export async function runAnalysis(sessionId, sensitiveAttributes, targetColumn) {
+export async function runAnalysis(sessionId, sensitiveAttributes, targetColumn, favorableOutcome = null) {
   const res = await api.post('/analysis/', {
     session_id: sessionId,
     sensitive_attributes: sensitiveAttributes,
     target_column: targetColumn,
+    favorable_outcome: favorableOutcome,
   });
   return res.data;
 }
 
-export async function runMitigation(sessionId, sensitiveAttributes, targetColumn, strategy) {
+export async function runMitigation(sessionId, sensitiveAttributes, targetColumn, strategy, favorableOutcome = null) {
   const res = await api.post('/mitigation/', {
     session_id: sessionId,
     sensitive_attributes: sensitiveAttributes,
     target_column: targetColumn,
     strategy,
+    favorable_outcome: favorableOutcome,
   });
   return res.data;
 }
 
-export async function downloadReport(sessionId, sensitiveAttributes, targetColumn) {
+export async function downloadReport(sessionId, sensitiveAttributes, targetColumn, favorableOutcome = null) {
   const res = await api.post('/report/pdf', {
     session_id: sessionId,
     sensitive_attributes: sensitiveAttributes,
     target_column: targetColumn,
+    favorable_outcome: favorableOutcome,
   }, { responseType: 'blob' });
   const url = window.URL.createObjectURL(new Blob([res.data]));
   const link = document.createElement('a');

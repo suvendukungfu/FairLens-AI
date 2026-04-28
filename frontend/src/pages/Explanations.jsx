@@ -118,7 +118,7 @@ export default function Explanations() {
               >
                 <div className="flex items-center gap-3">
                   <span className={`text-lg ${item.bias ? 'text-amber-400' : 'text-slate-400'}`}>
-                    {item.bias ? '⚠️' : '•'}
+                    {item.bias ? '️' : '•'}
                   </span>
                   <span className="text-sm text-slate-300">{item.feature}</span>
                 </div>

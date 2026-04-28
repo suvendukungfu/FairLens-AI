@@ -171,6 +171,7 @@ async def run_analysis(request):
     sid = body.get("session_id")
     sensitive_attrs = body.get("sensitive_attributes", [])
     target_col = body.get("target_column", "")
+    favorable_outcome = body.get("favorable_outcome")
 
     if sid not in sessions:
         fp = os.path.join(UPLOAD_DIR, f"{sid}.csv")
@@ -192,7 +193,9 @@ async def run_analysis(request):
 
     info = get_dataset_info(df, sessions[sid]["filename"])
     distributions = get_distributions(df, sensitive_attrs)
-    metrics, comparisons, predictions, top_features, performance = run_full_analysis(df, sensitive_attrs, target_col)
+    metrics, comparisons, predictions, top_features, performance = run_full_analysis(
+        df, sensitive_attrs, target_col, favorable_outcome=favorable_outcome
+    )
 
     flags = detect_skewed_representation(df, sensitive_attrs)
     flags.extend(detect_outcome_bias(df, predictions, sensitive_attrs))
@@ -231,6 +234,7 @@ async def apply_mitigation(request):
     sensitive_attrs = body.get("sensitive_attributes", [])
     target_col = body.get("target_column", "")
     strategy = body.get("strategy", "reweighing")
+    favorable_outcome = body.get("favorable_outcome")
 
     if sid not in sessions:
         fp = os.path.join(UPLOAD_DIR, f"{sid}.csv")
@@ -246,7 +250,11 @@ async def apply_mitigation(request):
     df = load_and_validate(filepath)
 
     # Before metrics
-    before_metrics, _, before_preds = run_full_analysis(df, sensitive_attrs, target_col)
+    before_metrics, _, before_preds, _, performance_before = run_full_analysis(
+        df, sensitive_attrs, target_col, favorable_outcome=favorable_outcome
+    )
+    fav_label = performance_before.get("favorable_label", 1)
+    
     before_flags = detect_skewed_representation(df, sensitive_attrs)
     before_flags.extend(detect_outcome_bias(df, before_preds, sensitive_attrs))
     before_score = compute_bias_score(before_metrics, before_flags)
@@ -259,7 +267,7 @@ async def apply_mitigation(request):
     y_true = le.fit_transform(df[target_col])
     sensitive_feature = df[sensitive_attrs[0]]
 
-    dp_after, eo_after, _ = compute_fairness_manual(y_true, after_preds, sensitive_feature)
+    dp_after, eo_after, _ = compute_fairness_manual(y_true, after_preds, sensitive_feature, favorable_label=fav_label)
 
     from models.schemas import FairnessMetric
     after_metrics = [
@@ -365,6 +373,6 @@ app.add_routes([
 ])
 
 if __name__ == "__main__":
-    print("🔬 FairLens AI Backend starting on http://localhost:8000")
-    print("📖 All routes: /health, /api/upload/, /api/kaggle/*, /api/analysis/, /api/mitigation/, /api/report/pdf")
+    print(" FairLens AI Backend starting on http://localhost:8000")
+    print(" All routes: /health, /api/upload/, /api/kaggle/*, /api/analysis/, /api/mitigation/, /api/report/pdf")
     web.run_app(app, host="0.0.0.0", port=8000)

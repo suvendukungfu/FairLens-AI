@@ -50,6 +50,15 @@ def get_dataset_info(df: pd.DataFrame, filename: str) -> DatasetInfo:
     }
     missing = df.isnull().sum().to_dict()
 
+    unique_vals = {}
+    for col in df.columns:
+        # Only take unique values for categorical or low-cardinality numeric columns
+        unique = df[col].unique().tolist()
+        if len(unique) <= 20:
+            unique_vals[col] = [str(x) for x in unique]
+        else:
+            unique_vals[col] = [] # Too many values to display as a simple list
+
     return DatasetInfo(
         filename=filename,
         rows=len(df),
@@ -57,6 +66,7 @@ def get_dataset_info(df: pd.DataFrame, filename: str) -> DatasetInfo:
         column_names=df.columns.tolist(),
         dtypes=dtypes,
         missing_values={k: int(v) for k, v in missing.items()},
+        unique_values=unique_vals
     )
 
 

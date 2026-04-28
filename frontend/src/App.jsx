@@ -30,11 +30,19 @@ function ProtectedRoute({ children }) {
 }
 
 function UploadPage() {
-  const { datasetInfo } = useAppStore();
+  const { datasetInfo, setDatasetInfo, setSessionId, setKaggleMeta } = useAppStore();
 
   if (datasetInfo) {
     return <Navigate to="/overview" replace />;
   }
+
+  const handleUploadSuccess = (result) => {
+    setSessionId(result.session_id);
+    setDatasetInfo(result.dataset_info);
+    if (result.kaggle_meta) {
+      setKaggleMeta(result.kaggle_meta);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -64,7 +72,7 @@ function UploadPage() {
             Upload a dataset or load a sample to begin fairness analysis
           </p>
         </div>
-        <UploadSection />
+        <UploadSection onUploadSuccess={handleUploadSuccess} />
       </main>
     </div>
   );

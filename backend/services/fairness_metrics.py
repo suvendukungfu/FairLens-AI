@@ -54,7 +54,7 @@ def preprocess_for_sklearn(df: pd.DataFrame, target_col: str):
         # Auto-convert numeric continuous targets to binary based on median
         median_val = df_clean[target_col].median()
         df_clean[target_col] = (df_clean[target_col] > median_val).astype(int)
-        print(f"⚠️ Target '{target_col}' has high cardinality ({unique_targets}). Auto-binning at median ({median_val}) for classification.")
+        print(f"️ Target '{target_col}' has high cardinality ({unique_targets}). Auto-binning at median ({median_val}) for classification.")
     elif unique_targets > 50:
          raise ValueError(f"Target column '{target_col}' has too many unique values ({unique_targets}). Please use a classification target or categorical column.")
 
@@ -75,7 +75,7 @@ def preprocess_for_sklearn(df: pd.DataFrame, target_col: str):
     return X, y, le
 
 
-def compute_fairness_manual(y_true, y_pred, sensitive_features):
+def compute_fairness_manual(y_true, y_pred, sensitive_features, favorable_label=1):
     """Compute fairness metrics manually (no Fairlearn needed)."""
     # Ensure numpy arrays for safe comparison
     y_true = np.asarray(y_true)
@@ -89,11 +89,13 @@ def compute_fairness_manual(y_true, y_pred, sensitive_features):
     for g in groups:
         mask = sensitive_features == g
         if mask.sum() > 0:
-            selection_rates[g] = float(np.mean(y_pred[mask] == 1))
+            # Selection rate: how often is the favorable label predicted?
+            selection_rates[g] = float(np.mean(y_pred[mask] == favorable_label))
 
-            pos_mask = mask & (y_true == 1)
+            # TPR: how often is favorable label predicted when it's the true label?
+            pos_mask = mask & (y_true == favorable_label)
             if pos_mask.sum() > 0:
-                tpr_rates[g] = float(np.mean(y_pred[pos_mask] == 1))
+                tpr_rates[g] = float(np.mean(y_pred[pos_mask] == favorable_label))
             else:
                 tpr_rates[g] = 0.0
 
@@ -103,7 +105,7 @@ def compute_fairness_manual(y_true, y_pred, sensitive_features):
     return dp_diff, eo_diff, selection_rates
 
 
-def run_full_analysis(df: pd.DataFrame, sensitive_attrs: list[str], target_col: str):
+def run_full_analysis(df: pd.DataFrame, sensitive_attrs: list[str], target_col: str, favorable_outcome: str = None):
     """Run full fairness analysis using Random Forest."""
     X, y, le = preprocess_for_sklearn(df, target_col)
 
@@ -123,22 +125,46 @@ def run_full_analysis(df: pd.DataFrame, sensitive_attrs: list[str], target_col: 
     y_pred = clf.predict(X_test)
     y_pred_full = clf.predict(X)
 
+    # Detect if multiclass
+    unique_labels = np.unique(y_test)
+    is_multiclass = len(unique_labels) > 2
+    avg_method = 'weighted' if is_multiclass else 'binary'
+    
+    # Determine favorable label
+    fav_label = 1
+    if favorable_outcome:
+        try:
+            # Try to encode the provided favorable outcome
+            fav_label = le.transform([favorable_outcome])[0]
+        except Exception:
+            fav_label = unique_labels[-1] if is_multiclass else 1
+    else:
+        fav_label = unique_labels[-1] if is_multiclass else 1
+
     # Performance Metrics
     acc = accuracy_score(y_test, y_pred)
-    prec, rec, f1, _ = precision_recall_fscore_support(y_test, y_pred, average='binary')
-    cm = confusion_matrix(y_test, y_pred).tolist() # [[TN, FP], [FN, TP]]
+    # For binary metrics (prec/rec/f1), if multiclass, use weighted average
+    # If we have a specific favorable outcome, we could also use pos_label=fav_label if binary
+    if not is_multiclass:
+        prec, rec, f1, _ = precision_recall_fscore_support(y_test, y_pred, average='binary', pos_label=fav_label)
+    else:
+        prec, rec, f1, _ = precision_recall_fscore_support(y_test, y_pred, average='weighted')
+
+    cm = confusion_matrix(y_test, y_pred).tolist()
 
     performance = {
         "accuracy": round(float(acc), 4),
         "precision": round(float(prec), 4),
         "recall": round(float(rec), 4),
         "f1": round(float(f1), 4),
-        "confusion_matrix": cm
+        "confusion_matrix": cm,
+        "is_multiclass": is_multiclass,
+        "favorable_label": int(fav_label)
     }
 
     # Fairness metrics on test set
     sensitive_feature = df.iloc[idx_test][sensitive_attrs[0]].values
-    dp_diff, eo_diff, rates = compute_fairness_manual(y_test, y_pred, sensitive_feature)
+    dp_diff, eo_diff, rates = compute_fairness_manual(y_test, y_pred, sensitive_feature, favorable_label=fav_label)
 
     metrics = [
         FairnessMetric(
