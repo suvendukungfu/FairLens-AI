@@ -127,7 +127,7 @@ export default function BiasDetection() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="relative group p-[1px] rounded-3xl overflow-hidden bg-linear-to-r from-blue-500 via-purple-500 to-pink-500"
+          className="relative group p-px rounded-3xl overflow-hidden bg-linear-to-r from-blue-500 via-purple-500 to-pink-500"
         >
           <div className="glass-card bg-slate-900/95 p-8 rounded-[23px] relative z-10">
             <div className="flex items-center justify-between mb-6">
