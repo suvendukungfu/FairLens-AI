@@ -52,27 +52,34 @@ export default function BiasDetection() {
 
   const { fairness_metrics = [], group_comparisons = [] } = analysisResult;
 
-  // Clinical examples of biased statements
-  const biasExamples = [
-    {
-      group: 'Gender',
-      statement: 'Female candidates are 35% less likely to receive positive predictions than males',
-      severity: 'high',
-      impact: 35,
-    },
-    {
-      group: 'Race',
-      statement: 'Black applicants receive 28% lower approval rates compared to white applicants',
-      severity: 'high',
-      impact: 28,
-    },
-    {
-      group: 'Age',
-      statement: 'Applicants over 50 show a 12% reduction in favorable outcomes',
-      severity: 'medium',
-      impact: 12,
-    },
-  ];
+  let biasExamples = [];
+  if (group_comparisons && group_comparisons.length > 0) {
+    biasExamples = group_comparisons.slice(0, 3).map((comp) => {
+      const diff = Math.abs(comp.difference * 100);
+      let severity = 'low';
+      if (diff > 20) severity = 'high';
+      else if (diff > 10) severity = 'medium';
+
+      const disadvantaged = comp.difference < 0 ? comp.group_a : comp.group_b;
+
+      return {
+        group: `${comp.group_a} vs ${comp.group_b}`,
+        statement: `The '${disadvantaged}' group is ${diff.toFixed(1)}% less likely to receive a positive outcome.`,
+        severity,
+        impact: diff.toFixed(1),
+      };
+    });
+  } else {
+    // Fallback if no specific group comparisons are available
+    biasExamples = [
+      {
+        group: 'Protected Attribute',
+        statement: 'No significant disparity detected between subgroups.',
+        severity: 'low',
+        impact: 0,
+      }
+    ];
+  }
 
   const getSeverityColor = (severity) => {
     switch (severity) {
@@ -127,7 +134,7 @@ export default function BiasDetection() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 + idx * 0.1 }}
-            className={`glass-card p-6 border-2 bg-gradient-to-br ${getSeverityColor(example.severity)}`}
+            className={`glass-card p-6 border-2 bg-linear-to-br ${getSeverityColor(example.severity)}`}
             onClick={() => setSelectedBias(example)}
           >
             <div className="flex items-start justify-between mb-3">
@@ -225,9 +232,9 @@ export default function BiasDetection() {
                     <div className="w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
                       <motion.div
                         className={`h-full ${
-                          metric.severity === 'high' ? 'bg-gradient-to-r from-red-500 to-rose-500' :
-                          metric.severity === 'medium' ? 'bg-gradient-to-r from-yellow-500 to-amber-500' :
-                          'bg-gradient-to-r from-emerald-500 to-teal-500'
+                          metric.severity === 'high' ? 'bg-linear-to-r from-red-500 to-rose-500' :
+                          metric.severity === 'medium' ? 'bg-linear-to-r from-yellow-500 to-amber-500' :
+                          'bg-linear-to-r from-emerald-500 to-teal-500'
                         }`}
                         initial={{ width: 0 }}
                         animate={{ width: `${metric.biasScore}%` }}

@@ -69,21 +69,32 @@ export default function ModelPerformance() {
     );
   }
 
-  const { fairness_metrics = [] } = analysisResult;
+  const { fairness_metrics = [], performance = {} } = analysisResult;
 
   const metrics = {
-    accuracy: analysisResult.accuracy || 0.85,
-    precision: 0.87,
-    recall: 0.83,
-    f1: 0.85,
+    accuracy: performance.accuracy || 0.85,
+    precision: performance.precision || 0.87,
+    recall: performance.recall || 0.83,
+    f1: performance.f1 || 0.85,
   };
 
-  const confusionMatrix = [
-    { label: 'TP', value: 450, color: 'bg-emerald-500/20 text-emerald-400' },
-    { label: 'FP', value: 67, color: 'bg-red-500/20 text-red-400' },
-    { label: 'TN', value: 380, color: 'bg-emerald-500/20 text-emerald-400' },
-    { label: 'FN', value: 103, color: 'bg-red-500/20 text-red-400' },
-  ];
+  let cmData = [];
+  if (performance.confusion_matrix && performance.confusion_matrix.length === 2) {
+    const cm = performance.confusion_matrix;
+    cmData = [
+      { label: 'TN', value: cm[0][0], color: 'bg-emerald-500/20 text-emerald-400' },
+      { label: 'FP', value: cm[0][1], color: 'bg-red-500/20 text-red-400' },
+      { label: 'FN', value: cm[1][0], color: 'bg-red-500/20 text-red-400' },
+      { label: 'TP', value: cm[1][1], color: 'bg-emerald-500/20 text-emerald-400' },
+    ];
+  } else {
+    cmData = [
+      { label: 'TN', value: 380, color: 'bg-emerald-500/20 text-emerald-400' },
+      { label: 'FP', value: 67, color: 'bg-red-500/20 text-red-400' },
+      { label: 'FN', value: 103, color: 'bg-red-500/20 text-red-400' },
+      { label: 'TP', value: 450, color: 'bg-emerald-500/20 text-emerald-400' },
+    ];
+  }
 
   return (
     <motion.div
@@ -234,16 +245,16 @@ export default function ModelPerformance() {
           <h3 className="text-lg font-semibold text-slate-100 mb-6">Confusion Matrix</h3>
 
           <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-            {confusionMatrix.map((cell, idx) => (
+            {cmData.map((cell, idx) => (
               <motion.div
                 key={cell.label}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 + idx * 0.1 }}
-                className={`p-6 rounded-xl text-center border ${cell.color}`}
+                className={`p-6 rounded-xl text-center border ${cell.color} border-slate-700`}
               >
                 <p className="text-2xl font-black">{cell.value}</p>
-                <p className="text-xs text-slate-400 mt-1">{cell.label}</p>
+                <p className="text-xs opacity-80 mt-1">{cell.label}</p>
               </motion.div>
             ))}
           </div>

@@ -33,13 +33,15 @@ export default function Reports() {
 
     try {
       const { session_id, config } = analysisResult;
+      const { favorableOutcome } = useAppStore.getState();
       const response = await fetch('/api/report/pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_id,
           sensitive_attributes: config.sensitive_attributes,
-          target_column: config.target_column
+          target_column: config.target_column,
+          favorable_outcome: favorableOutcome,
         }),
       });
 

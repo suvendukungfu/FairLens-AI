@@ -314,6 +314,7 @@ async def generate_pdf_report(request):
     sid = body.get("session_id")
     sensitive_attrs = body.get("sensitive_attributes", [])
     target_col = body.get("target_column", "")
+    favorable_outcome = body.get("favorable_outcome")
 
     if sid not in sessions:
         fp = os.path.join(UPLOAD_DIR, f"{sid}.csv")
@@ -328,7 +329,9 @@ async def generate_pdf_report(request):
     from services.fairness_metrics import run_full_analysis
     from services.report_generator import generate_pdf_report as service_gen_pdf
 
-    metrics, comparisons, predictions, top_features, performance = run_full_analysis(df, sensitive_attrs, target_col)
+    metrics, comparisons, predictions, top_features, performance = run_full_analysis(
+        df, sensitive_attrs, target_col, favorable_outcome=favorable_outcome
+    )
     flags = detect_skewed_representation(df, sensitive_attrs)
     flags.extend(detect_outcome_bias(df, predictions, sensitive_attrs))
     score = compute_bias_score(metrics, flags)

@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/useAppStore';
-import ThemeToggle from './ThemeToggle';
+
 import AlertSystem from './AlertSystem';
 import NotificationPanel from './NotificationPanel';
 
@@ -96,10 +96,7 @@ export default function AppLayout({ children }) {
           </button>
         </nav>
 
-        {/* Theme Toggle */}
-        <div className="absolute bottom-6 left-0 right-0 px-4">
-          <ThemeToggle />
-        </div>
+
       </motion.aside>
 
       {/* Main Content Area */}
