@@ -213,6 +213,13 @@ async def run_analysis(request):
     score = compute_bias_score(metrics, flags)
     explanations = generate_explanations(metrics, flags, score)
 
+    from services.ai_insight_service import generate_gemini_fairness_report
+    gemini_insight = generate_gemini_fairness_report(
+        [m.model_dump() for m in metrics],
+        [f.model_dump() for f in flags],
+        info.model_dump()
+    )
+
     result = {
         "dataset_info": info.model_dump(),
         "distributions": [d.model_dump() for d in distributions],
@@ -223,6 +230,7 @@ async def run_analysis(request):
         "explanations": explanations,
         "performance": performance,
         "top_features": top_features,
+        "gemini_insight": gemini_insight,
     }
     return web.json_response(result)
 

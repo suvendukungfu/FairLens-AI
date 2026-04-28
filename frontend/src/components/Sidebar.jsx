@@ -5,7 +5,7 @@ const TABS = [
   { id: 'dataset', label: 'Dataset Analysis', icon: '', description: 'Distribution & feature analysis' },
   { id: 'performance', label: 'Model Performance', icon: '', description: 'Accuracy, F1 & Confusion Matrix' },
   { id: 'metrics', label: 'Fairness Metrics', icon: '️', description: 'Detailed fairness analysis' },
-  { id: 'flags', label: 'Bias Detection', icon: '', description: 'Detected bias patterns' },
+  { id: 'flags', label: 'Bias Detection', icon: '🎯', description: 'Detected bias patterns', badge: 'Google AI' },
   { id: 'mitigation', label: 'Mitigation', icon: '️', description: 'Bias reduction strategies' },
   { id: 'reports', label: 'Reports', icon: '', description: 'Generate audit report' },
 ];
@@ -86,7 +86,14 @@ export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggleC
             <span className="text-lg shrink-0">{tab.icon}</span>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm truncate">{tab.label}</div>
+                <div className="flex items-center gap-2">
+                  <div className="font-semibold text-sm truncate">{tab.label}</div>
+                  {tab.badge && (
+                    <span className="px-1.5 py-0.5 rounded-md bg-blue-500/10 text-[10px] text-blue-400 border border-blue-500/20 font-bold tracking-tight">
+                      {tab.badge}
+                    </span>
+                  )}
+                </div>
                 <div className="text-xs text-slate-500 truncate group-hover:text-slate-400 transition-colors">
                   {tab.description}
                 </div>

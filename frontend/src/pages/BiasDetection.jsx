@@ -121,6 +121,51 @@ export default function BiasDetection() {
         </motion.div>
       </div>
 
+      {/* Google Gemini AI Insight */}
+      {analysisResult.gemini_insight && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="relative group p-[1px] rounded-3xl overflow-hidden bg-linear-to-r from-blue-500 via-purple-500 to-pink-500"
+        >
+          <div className="glass-card bg-slate-900/95 p-8 rounded-[23px] relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                  <svg className="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                    Google Gemini AI Fairness Audit
+                    <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      Competition Feature
+                    </span>
+                  </h3>
+                  <p className="text-sm text-slate-400">Context-aware bias analysis and mitigation strategy</p>
+                </div>
+              </div>
+              <div className="hidden md:block">
+                <div className="px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-xs text-slate-500 font-mono">
+                  Powered by Gemini 2.0 Flash
+                </div>
+              </div>
+            </div>
+
+            <div className="prose prose-invert max-w-none">
+              <div className="p-6 rounded-2xl bg-slate-800/30 border border-slate-700/30 text-slate-300 leading-relaxed whitespace-pre-wrap font-sans text-sm md:text-base">
+                {analysisResult.gemini_insight}
+              </div>
+            </div>
+          </div>
+          
+          {/* Animated background glow */}
+          <div className="absolute inset-0 bg-linear-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl" />
+        </motion.div>
+      )}
+
       {/* Bias Alert Cards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
