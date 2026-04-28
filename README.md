@@ -4,6 +4,10 @@
 
 **Detect, analyze, and mitigate bias in datasets and machine learning models**
 
+### 🌐 [LIVE DEMO LINK](https://visionary-cuchufli-b00f69.netlify.app)
+> **Note**: The backend is currently running via a secure **Google Cloud / Localtunnel** bridge to provide live, real-time Gemini AI auditing during the evaluation period.
+
+
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.136-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
 [![Tailwind](https://img.shields.io/badge/Tailwind-4.0-38BDF8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
