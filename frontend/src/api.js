@@ -5,7 +5,8 @@ const API_BASE = '/api';
 const api = axios.create({
   baseURL: API_BASE,
   headers: {
-    'Bypass-Tunnel-Reminder': 'true'
+    'Bypass-Tunnel-Reminder': 'true',
+    'ngrok-skip-browser-warning': 'true'
   }
 });
 

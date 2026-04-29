@@ -384,7 +384,31 @@ app.add_routes([
     web.post("/api/report/pdf", generate_pdf_report),
 ])
 
+# ---------------------------------------------------------------------------
+#  Serve frontend static files (built React app)
+# ---------------------------------------------------------------------------
+FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
+
+async def spa_fallback(request):
+    """Serve the frontend SPA — try static file first, fallback to index.html."""
+    rel_path = request.match_info.get("path", "")
+    file_path = os.path.join(FRONTEND_DIST, rel_path)
+    if rel_path and os.path.isfile(file_path):
+        return web.FileResponse(file_path)
+    index_path = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.isfile(index_path):
+        return web.FileResponse(index_path)
+    return web.json_response({"error": "Frontend not built. Run 'npm run build' in frontend/"}, status=404)
+
+if os.path.isdir(FRONTEND_DIST):
+    app.router.add_static("/assets", os.path.join(FRONTEND_DIST, "assets"))
+    app.router.add_get("/favicon.svg", lambda r: web.FileResponse(os.path.join(FRONTEND_DIST, "favicon.svg")))
+    app.router.add_get("/{path:.*}", spa_fallback)
+    print(f" Frontend served from {FRONTEND_DIST}")
+
 if __name__ == "__main__":
-    print(" FairLens AI Backend starting on http://localhost:8000")
+    print(" FairLens AI Backend starting on http://localhost:8001")
     print(" All routes: /health, /api/upload/, /api/kaggle/*, /api/analysis/, /api/mitigation/, /api/report/pdf")
-    web.run_app(app, host="0.0.0.0", port=8000)
+    print(" Proxy target: 'http://127.0.0.1:8001', in your browser!")
+    port = int(os.environ.get("PORT", 8001))
+    web.run_app(app, host="0.0.0.0", port=port)
